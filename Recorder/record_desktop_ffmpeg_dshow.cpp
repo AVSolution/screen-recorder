@@ -27,7 +27,7 @@ namespace am {
 		clean_up();
 	}
 
-	int record_desktop_ffmpeg_dshow::init(const RECORD_DESKTOP_RECT & rect, const int fps)
+	int record_desktop_ffmpeg_dshow::init(const RECORD_DESKTOP_RECT & rect, const int fps,bool hasCursor)
 	{
 		int error = AE_NO;
 		if (_inited == true) {
@@ -35,6 +35,7 @@ namespace am {
 		}
 
 		_fps = fps;
+		_hasCursor = hasCursor;
 		_rect = rect;
 
 		char buff_video_size[50] = { 0 };
@@ -45,7 +46,7 @@ namespace am {
 		av_dict_set_int(&options, "offset_x", rect.left, AV_DICT_MATCH_CASE);
 		av_dict_set_int(&options, "offset_y", rect.top, AV_DICT_MATCH_CASE);
 		av_dict_set(&options, "video_size", buff_video_size, AV_DICT_MATCH_CASE);
-		av_dict_set_int(&options, "draw_mouse", 1, AV_DICT_MATCH_CASE);
+		av_dict_set_int(&options, "draw_mouse", _hasCursor, AV_DICT_MATCH_CASE);
 
 		int ret = 0;
 		do {

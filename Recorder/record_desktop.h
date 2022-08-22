@@ -21,7 +21,8 @@ namespace am {
 
 		virtual int init(
 			const RECORD_DESKTOP_RECT &rect,
-			const int fps
+			const int fps,
+			bool hasCursor
 		) = 0;
 
 		virtual int start() = 0;
@@ -56,6 +57,7 @@ namespace am {
 		std::atomic_bool _running;
 		std::atomic_bool _paused;
 		std::atomic_bool _inited;
+		std::atomic_bool _hasCursor{ true };
 
 		std::thread _thread;
 

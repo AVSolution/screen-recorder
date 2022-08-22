@@ -45,7 +45,7 @@ namespace am {
 		clean_up();
 	}
 
-	int record_desktop_duplication::init(const RECORD_DESKTOP_RECT & rect, const int fps)
+	int record_desktop_duplication::init(const RECORD_DESKTOP_RECT & rect, const int fps, bool hasCursor)
 	{
 		int error = AE_NO;
 		if (_inited == true) {
@@ -53,6 +53,7 @@ namespace am {
 		}
 
 		_fps = fps;
+		_hasCursor = hasCursor;
 		_rect = rect;
 
 		do {
@@ -806,6 +807,13 @@ namespace am {
 		while (_running)
 		{
 			//Timeout is no new picture,no need to update
+			HWND wnd = FindWindow(NULL, "±ÈÐÄ");
+			RECT rt;
+			GetWindowRect(wnd, &rt);
+			_rect.left = rt.left;
+			_rect.top = rt.top;
+			_rect.right = rt.right;
+			_rect.bottom = rt.bottom;
 			if ((error = get_desktop_image(&frame_info)) == AE_TIMEOUT) continue;
 
 			if (error != AE_NO) {
@@ -822,7 +830,7 @@ namespace am {
 				continue;
 			}
 
-			if ((error = get_desktop_cursor(&frame_info)) == AE_NO)
+			if (_hasCursor && (error = get_desktop_cursor(&frame_info)) == AE_NO)
 				draw_cursor();
 
 			free_duplicated_frame();

@@ -2,11 +2,15 @@
 
 #include "error_define.h"
 #include "log_helper.h"
+#include "system_version.h"
+
+#include <dwmapi.h>
 
 namespace am {
 
 	record_desktop_gdi::record_desktop_gdi()
 	{
+		al_info("record_desktop_gdi");
 		_data_type = RECORD_DESKTOP_DATA_TYPES::AT_DESKTOP_BGRA;
 		_buffer = NULL;
 		_buffer_size = 0;
@@ -17,6 +21,13 @@ namespace am {
 		_bmp = NULL;
 		_bmp_old = NULL;
 		_ci = { 0 };
+
+		if (!system_version::is_win8_or_above()) {
+			BOOL enable = false;
+			DwmIsCompositionEnabled(&enable);
+			if (enable)
+				DwmEnableComposition(DWM_EC_DISABLECOMPOSITION);
+		}
 	}
 
 	record_desktop_gdi::~record_desktop_gdi()
@@ -25,7 +36,7 @@ namespace am {
 		clean_up();
 	}
 
-	int record_desktop_gdi::init(const RECORD_DESKTOP_RECT & rect, const int fps)
+	int record_desktop_gdi::init(const RECORD_DESKTOP_RECT & rect, const int fps, bool hasCursor)
 	{
 		int error = AE_NO;
 		if (_inited == true) {
@@ -33,8 +44,8 @@ namespace am {
 		}
 
 		_fps = fps;
+		_hasCursor = hasCursor;
 		_rect = rect;
-
 
 		do {
 			_width = rect.right - rect.left;
@@ -50,7 +61,7 @@ namespace am {
 			_inited = true;
 		} while (0);
 
-		al_info("init gdi finished,error: %s %ld", err2str(error), GetLastError());
+		al_info("init gdi finished width: %d,height: %d,error: %s %ld", _width,_height, err2str(error), GetLastError());
 
 		return error;
 	}
@@ -149,7 +160,16 @@ namespace am {
 
 		do {
 
-			hdc_screen = GetWindowDC(NULL);
+			HWND wnd = FindWindow(NULL, "±ÈÐÄ");
+			hdc_screen = GetWindowDC(wnd);
+			RECT rt;
+			GetWindowRect(wnd, &rt);
+			_rect.left = rt.left;
+			_rect.top = rt.top;
+			_rect.right = rt.right;
+			_rect.bottom = rt.bottom;
+
+			//hdc_screen = GetWindowDC(wnd);
 			if (!hdc_screen) {
 				al_error("get window dc failed:%lu", GetLastError());
 				error = AE_GDI_GET_DC_FAILED;
@@ -173,7 +193,7 @@ namespace am {
 			SelectObject(hdc_mem, hbm_mem);
 
 			//must have CAPTUREBLT falg,otherwise some layered window can not be captured
-			if (!BitBlt(hdc_mem, 0, 0, _width, _height, hdc_screen, _rect.left, _rect.top, SRCCOPY | CAPTUREBLT)) {
+			if (!BitBlt(hdc_mem, 0, 0, _width, _height, hdc_screen,/* _rect.left*/0, /*_rect.top*/0, SRCCOPY | CAPTUREBLT)) {
 				al_error("bitblt data failed:%lu", GetLastError());
 				//error = AE_GDI_BITBLT_FAILED;
 				//administrator UAC will trigger invalid handle error
@@ -182,7 +202,7 @@ namespace am {
 
 			memset(&_ci, 0, sizeof(CURSORINFO));
 			_ci.cbSize = sizeof(CURSORINFO);
-			if (GetCursorInfo(&_ci)) {
+			if (_hasCursor && GetCursorInfo(&_ci)) {
 				draw_cursor(hdc_mem);
 			}
 

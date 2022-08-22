@@ -22,7 +22,7 @@ namespace am {
 	class ring_buffer
 	{
 	public:
-		ring_buffer(unsigned int size = 1920 * 1080 * 4 * 10)
+		ring_buffer(unsigned int size = 1920 * 1080 * 4 * 5)
 		{
 			_size = size;
 			_head = _tail = 0;

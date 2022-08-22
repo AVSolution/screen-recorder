@@ -10,6 +10,8 @@
 #include <ShellScalingApi.h>
 
 #include <string>
+#include <iostream>
+#include <thread>
 
 void on_preview_image(
 	const unsigned char *data,
@@ -45,20 +47,33 @@ int main()
 
 	int n_vencoders = recorder_get_vencoders(&vencoders);
 
-	SetProcessDpiAwareness(PROCESS_SYSTEM_DPI_AWARE);
+	//SetProcessDpiAwareness(PROCESS_SYSTEM_DPI_AWARE);
 
-	setting.v_left = 0;
-	setting.v_top = 0;
-	setting.v_width = GetSystemMetrics(SM_CXSCREEN);
-	setting.v_height = GetSystemMetrics(SM_CYSCREEN);
+	HWND wnd = ::FindWindow(NULL, L"±ÈÐÄ");
+	if (wnd == nullptr) {
+		printf(" not find bixin client window.\n");
+		return -1;
+	}
+	
+	RECT rt;
+	GetWindowRect(wnd, &rt);
+	int width = rt.right - rt.left;
+	int height = rt.bottom - rt.top;
+
+	setting.v_left = rt.left;//0
+	setting.v_top = rt.top;//0
+	setting.v_width = width;//GetSystemMetrics(SM_CXSCREEN);
+	setting.v_height = height;//GetSystemMetrics(SM_CYSCREEN);
 	setting.v_qb = 100;
 	setting.v_bit_rate = 1280 * 1000;
-	setting.v_frame_rate = 30;
+	setting.v_frame_rate = 15;
+	setting.v_cutting_screen = false;
+	setting.v_mouse_track = true;
 
 	//////////////should be the truely encoder id,zero will always be soft x264
 	setting.v_enc_id = 0;
 
-	sprintf(setting.output, "..\\..\\save.mp4");
+	sprintf(setting.output, "..\\..\\save.flv");
 	//sprintf(setting.output, "..\\..\\save.mkv");
 
 #if 1 //record speaker
@@ -76,6 +91,11 @@ int main()
 #endif
 
 	callback.func_preview_yuv = on_preview_image;
+
+	printf("please input record seconds:\n");
+	int nums = 0;
+	scanf("%d", &nums);
+	printf("record time : %d\n", nums);
 
 	int err = recorder_init(setting, callback);
 
@@ -96,8 +116,10 @@ int main()
 
 	printf("recorder resumed\r\n");*/
 
-	getchar();
-
+	for (int i = 0; i < nums; i++) {
+		std::this_thread::sleep_for(std::chrono::seconds(2));
+		printf("record time : sleep 2s  count: %d", i);
+	}
 
 	recorder_stop();
 

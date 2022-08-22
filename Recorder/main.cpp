@@ -26,16 +26,15 @@
 
 #define USE_WASAPI 1
 
-#define V_FRAME_RATE 30
-#define V_BIT_RATE 1280*1000
-#define V_WIDTH GetSystemMetrics(SM_CXSCREEN)
-#define V_HEIGHT  GetSystemMetrics(SM_CYSCREEN);
+#define V_FRAME_RATE 20//30
+#define V_BIT_RATE 1024*1024//1280*1000
+#define V_WIDTH 1010//GetSystemMetrics(SM_CXSCREEN)
+#define V_HEIGHT  670//GetSystemMetrics(SM_CYSCREEN);
 #define V_QUALITY 100
 
 #define A_SAMPLE_CHANNEL 2
 #define A_SAMPLE_RATE 44100
 #define A_BIT_RATE 128000
-
 
 //for test muxer
 static am::record_audio *_recorder_speaker = nullptr;
@@ -95,8 +94,15 @@ int start_muxer() {
 	rect.top = 0;
 	rect.right = V_WIDTH;
 	rect.bottom = V_HEIGHT;
+	HWND wnd= FindWindow(NULL, "±ÈÐÄ");
+	RECT rt;
+	GetWindowRect(wnd, &rt);
+	rect.left = rt.left;
+	rect.top = rt.top;
+	rect.right = rt.right;
+	rect.bottom = rt.bottom;
 
-	_recorder_desktop->init(rect, V_FRAME_RATE);
+	_recorder_desktop->init(rect, V_FRAME_RATE,true);
 
 	audios[0] = _recorder_microphone;
 	audios[1] = _recorder_speaker;
@@ -111,15 +117,15 @@ int start_muxer() {
 	setting.v_height = V_HEIGHT;
 	setting.v_qb = V_QUALITY;
 	setting.v_encoder_id = am::EID_VIDEO_X264;
-	setting.v_out_width = 1920;
-	setting.v_out_height = 1080;
+	setting.v_out_width = V_WIDTH;//1920;
+	setting.v_out_height = V_HEIGHT;//1080;
 
 	setting.a_nb_channel = A_SAMPLE_CHANNEL;
 	setting.a_sample_fmt = AV_SAMPLE_FMT_FLTP;
 	setting.a_sample_rate = A_SAMPLE_RATE;
 	setting.a_bit_rate = A_BIT_RATE;
 
-	int error = _muxer->init(am::utils_string::ascii_utf8("..\\..\\save.mp4").c_str(), _recorder_desktop, audios, 2, setting);
+	int error = _muxer->init(am::utils_string::ascii_utf8("..\\..\\save.flv").c_str(), _recorder_desktop, audios, 2, setting);
 	if (error != AE_NO) {
 		return error;
 	}
@@ -144,14 +150,24 @@ void stop_muxer()
 	delete _muxer;
 }
 
+#include <iostream>
 void test_recorder()
 {
 	//av_log_set_level(AV_LOG_DEBUG);
 
+	al_info("please input record seconds...");
+	int nums = 0;
+	std::cin >> nums;
+	al_info("record time : %d",nums);
+
 	start_muxer();
 
-	getchar();
+	for (int i = 0; i < nums; i++) {
+		std::this_thread::sleep_for(std::chrono::seconds(2));
+		al_info("record time : sleep 2s  count: %d", i);
+	}
 
+	al_info("record time end");
 	//stop have bug that sometime will stuck
 	stop_muxer();
 
@@ -461,9 +477,24 @@ void test_scale() {
 	get_valid_out_resolution(src_width, src_height, &dst_width, &dst_height);
 }
 
+#include <csignal> // sigsuspend()
+void signalHandler(int signum)
+{
+	test_recorder();
+
+	al_info("[INFO] interrupt signal %d received",signum);
+
+	al_info("[INFO] leaving!");
+
+	std::exit(signum);
+}
+
 int main(int argc, char **argv)
 {
+	signal(SIGINT, signalHandler);
+
 	al_info("record start...");
+
 
 	am::winversion_info ver = { 0 };
 

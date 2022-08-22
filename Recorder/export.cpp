@@ -175,19 +175,23 @@ int recorder::init(const AMRECORDER_SETTING & setting, const AMRECORDER_CALLBACK
 #endif 
 
 #ifdef _WIN32
-	if (system_version::is_win8_or_above()) {
-		error = record_desktop_new(RECORD_DESKTOP_TYPES::DT_DESKTOP_WIN_DUPLICATION, &_recorder_desktop);
-		if (error == AE_NO) {
+	al_info("system version is win7: %d,defaultGDI : %d,mouseTrack: %d", !system_version::is_win8_or_above(),!setting.v_cutting_screen,setting.v_mouse_track);
+	if (setting.v_cutting_screen) {
+		if (system_version::is_win8_or_above()) {
+			error = record_desktop_new(RECORD_DESKTOP_TYPES::DT_DESKTOP_WIN_DUPLICATION, &_recorder_desktop);
+			if (error == AE_NO) {
 
-			error = _recorder_desktop->init(
-			{
-				setting.v_left,setting.v_top,setting.v_width + setting.v_left,setting.v_height + setting.v_top
-			},
-				setting.v_frame_rate
-			);
+				error = _recorder_desktop->init(
+					{
+						setting.v_left,setting.v_top,setting.v_width + setting.v_left,setting.v_height + setting.v_top
+					},
+					setting.v_frame_rate,
+					setting.v_mouse_track
+				);
 
-			if (error != AE_NO)
-				record_desktop_destroy(&_recorder_desktop);
+				if (error != AE_NO)
+					record_desktop_destroy(&_recorder_desktop);
+			}
 		}
 	}
 
@@ -199,7 +203,8 @@ int recorder::init(const AMRECORDER_SETTING & setting, const AMRECORDER_CALLBACK
 		{
 			setting.v_left,setting.v_top,setting.v_width + setting.v_left,setting.v_height + setting.v_top
 		},
-			setting.v_frame_rate
+			setting.v_frame_rate,
+			setting.v_mouse_track
 		);
 
 		AMERROR_CHECK(error);

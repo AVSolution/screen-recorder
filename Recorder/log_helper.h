@@ -48,6 +48,7 @@ static const char *AM_LOG_STR[] = { "DEBUG", "INFO", "WARN", "ERROR", "FATAL" };
 	AMLog *am_log = AMLog::get();                                                \
 	if(am_log){                                                                     \
 		am_log->PRINT_LINE(AM_LOG_STR[type], format, datetime_str, now.millitm, ## __VA_ARGS__);  \
+		al_printf(AM_LOG_STR[type], format, datetime_str, now.millitm, ## __VA_ARGS__); \
 	} else {                                                                      \
 		al_printf(AM_LOG_STR[type], format, datetime_str, now.millitm, ## __VA_ARGS__);  \
 	}                                                                             \

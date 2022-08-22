@@ -16,7 +16,8 @@ namespace am {
 
 		virtual int init(
 			const RECORD_DESKTOP_RECT &rect,
-			const int fps);
+			const int fps,
+			bool hasCursor);
 
 		virtual int start();
 		virtual int pause();

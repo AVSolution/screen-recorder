@@ -76,6 +76,16 @@ typedef struct {
 	int v_frame_rate;
 
 	/**
+	* MouseCursor Track
+	*/
+	bool v_mouse_track;
+
+	/**
+	* screen cutting or window.
+	*/
+	bool v_cutting_screen;
+
+	/**
 	* Video encoder id
 	* Must get by recorder_get_vencoders
 	*/
@@ -83,7 +93,7 @@ typedef struct {
 
 	/**
 	* Output file path,the output file format is depended on the ext name.
-	* Support .mp4|.mkv for now.
+	* Support .mp4|.mkv | flv for now.
 	*/
 	char output[260];
 
