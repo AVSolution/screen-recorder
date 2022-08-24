@@ -498,6 +498,25 @@ namespace am {
 		D3D11_TEXTURE2D_DESC frame_desc;
 		_image->GetDesc(&frame_desc);
 
+		if (true) {
+			if (_rect.left < 0) {
+				_rect.right -= _rect.left;
+				_rect.left = 0;
+			}
+			if (_rect.right > frame_desc.Width) {
+				_rect.left -= (_rect.right - frame_desc.Width);
+				_rect.right = frame_desc.Width;
+			}
+			if (_rect.top < 0) {
+				_rect.bottom -= _rect.top;
+				_rect.top = 0;
+			}
+			if (_rect.bottom > frame_desc.Height) {
+				_rect.top -= (_rect.bottom - frame_desc.Height);
+				_rect.bottom = frame_desc.Height;
+			}
+		}
+
 		// Create a new staging buffer for fill frame image
 		ID3D11Texture2D *new_image = NULL;
 		frame_desc.Usage = D3D11_USAGE_STAGING;
