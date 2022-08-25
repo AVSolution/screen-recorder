@@ -48,7 +48,7 @@ AMLog* AMLog::get(const char* path)
 			}
 		}
 	}
-	FILE* handle = _fsopen(path, "w+", _SH_DENYNO);
+	FILE* handle = _fsopen(path, "a+", _SH_DENYNO);
 	if (!handle) {
 		return NULL;
 	}

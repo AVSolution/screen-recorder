@@ -377,7 +377,7 @@ AMRECORDER_API int recorder_get_speakers(AMRECORDER_DEVICE ** devices)
 	int index = 0;
 	for each (auto device in device_list)
 	{
-		al_info("audio input name:%s id:%s", device.name.c_str(), device.id.c_str());
+		al_info("audio output name:%s id:%s,isDefault: %d", device.name.c_str(), device.id.c_str(),device.is_default);
 
 		(*devices)[index].is_default = device.is_default;
 		sprintf_s((*devices)[index].id, 260, "%s", device.id.c_str());
@@ -403,7 +403,7 @@ AMRECORDER_API int recorder_get_mics(AMRECORDER_DEVICE ** devices)
 	int index = 0;
 	for each (auto device in device_list)
 	{
-		al_info("audio output name:%s id:%s", device.name.c_str(), device.id.c_str());
+		al_info("audio input name:%s id:%s,isDefault: %d", device.name.c_str(), device.id.c_str(),device.is_default);
 
 		(*devices)[index].is_default = device.is_default;
 		sprintf_s((*devices)[index].id, 260, "%s", device.id.c_str());
@@ -469,4 +469,5 @@ AMRECORDER_API void recorder_set_preview_enabled(int enable)
 AMRECORDER_API void recorder_set_logpath(const char * path)
 {
 	AMLog *log = AMLog::get(path);
+	al_info("=============record start==============");
 }

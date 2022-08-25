@@ -826,7 +826,7 @@ namespace am {
 		while (_running)
 		{
 			//Timeout is no new picture,no need to update
-			HWND wnd = FindWindow(NULL, "±ÈÐÄ");
+			HWND wnd = FindWindow(NULL, _regionTitle.c_str());
 			RECT rt;
 			GetWindowRect(wnd, &rt);
 			_rect.left = rt.left;

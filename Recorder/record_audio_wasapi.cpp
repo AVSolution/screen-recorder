@@ -255,7 +255,7 @@ namespace am {
 				break;
 			}
 
-			get_device_info(_device);
+			//get_device_info(_device);
 
 			hr = _device->Activate(__uuidof(IAudioClient), CLSCTX_ALL, NULL, (void**)&_capture_client);
 			if (hr != S_OK) {

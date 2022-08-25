@@ -19,7 +19,12 @@ void on_preview_image(
 	int width,
 	int height,
 	int type) {
-	//printf("on_preview_image size:%d type %d\r\n", size, type);
+	printf("on_preview_image size:%d,width: %d,height: %d type %d\r\n", size,width,height, type);
+
+	static FILE *ff = fopen("scale.yuv", "w+");
+	if (ff) {
+		fwrite(data, size, 1, ff);
+	}
 }
 
 int main()
@@ -67,7 +72,7 @@ int main()
 	setting.v_qb = 100;
 	setting.v_bit_rate = 1280 * 1000;
 	setting.v_frame_rate = 15;
-	setting.v_cutting_screen = false;
+	setting.v_cutting_screen = true;
 	setting.v_mouse_track = true;
 
 	//////////////should be the truely encoder id,zero will always be soft x264
@@ -98,6 +103,8 @@ int main()
 	printf("record time : %d\n", nums);
 
 	int err = recorder_init(setting, callback);
+
+	//recorder_set_preview_enabled(true);
 
 	err = recorder_start();
 

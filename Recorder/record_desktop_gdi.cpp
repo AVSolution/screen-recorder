@@ -160,7 +160,7 @@ namespace am {
 
 		do {
 
-			HWND wnd = FindWindow(NULL, "±ÈÐÄ");
+			HWND wnd = FindWindow(NULL, _regionTitle.c_str());
 			hdc_screen = GetWindowDC(wnd);
 			RECT rt;
 			GetWindowRect(wnd, &rt);
