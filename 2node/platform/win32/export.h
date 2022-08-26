@@ -39,6 +39,10 @@ typedef struct {
 typedef struct {
 
 	/**
+	* Handle of the  client window.
+	*/
+	void* v_handle;
+	/**
 	* Left of desktop area
 	*/
 	int v_left;

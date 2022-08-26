@@ -52,7 +52,7 @@ int main()
 
 	int n_vencoders = recorder_get_vencoders(&vencoders);
 
-	//SetProcessDpiAwareness(PROCESS_SYSTEM_DPI_AWARE);
+	SetProcessDpiAwareness(PROCESS_SYSTEM_DPI_AWARE);
 
 	HWND wnd = ::FindWindow(NULL, L"±ÈÐÄ");
 	if (wnd == nullptr) {
@@ -65,6 +65,7 @@ int main()
 	int width = rt.right - rt.left;
 	int height = rt.bottom - rt.top;
 
+	setting.v_handle = wnd;
 	setting.v_left = rt.left;//0
 	setting.v_top = rt.top;//0
 	setting.v_width = width;//GetSystemMetrics(SM_CXSCREEN);

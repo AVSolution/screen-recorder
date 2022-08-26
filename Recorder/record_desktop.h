@@ -63,7 +63,7 @@ namespace am {
 
 		std::string _device_name;
 
-		std::string _regionTitle{"±ÈÐÄ"};
+		void* _wnd;
 		RECORD_DESKTOP_RECT _rect;
 		RECORD_DESKTOP_DATA_TYPES _data_type;
 

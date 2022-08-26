@@ -46,6 +46,7 @@ namespace am {
 		_fps = fps;
 		_hasCursor = hasCursor;
 		_rect = rect;
+		_wnd = rect.wnd;
 
 		do {
 			_width = rect.right - rect.left;
@@ -160,7 +161,13 @@ namespace am {
 
 		do {
 
-			HWND wnd = FindWindow(NULL, _regionTitle.c_str());
+			HWND wnd = (HWND)_wnd;// FindWindow(NULL, _regionTitle.c_str());
+			if (!IsWindow(wnd)) {
+				al_error("not valid window handle");
+				error = AE_WINDOW_INVALID;
+				break;
+			}
+
 			hdc_screen = GetWindowDC(wnd);
 			RECT rt;
 			GetWindowRect(wnd, &rt);
@@ -168,6 +175,7 @@ namespace am {
 			_rect.top = rt.top;
 			_rect.right = rt.right;
 			_rect.bottom = rt.bottom;
+			//al_info("bixin client wnd: %p, left: %d,top:%d,right: %d,bottom: %d", wnd,_rect.left, _rect.top, _rect.right, _rect.bottom);
 
 			//hdc_screen = GetWindowDC(wnd);
 			if (!hdc_screen) {

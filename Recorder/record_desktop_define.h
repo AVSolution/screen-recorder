@@ -30,6 +30,7 @@ typedef enum {
 */
 
 typedef struct {
+	void* wnd;
 	int left;
 	int top;
 	int right;

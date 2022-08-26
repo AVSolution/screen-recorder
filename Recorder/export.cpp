@@ -183,7 +183,7 @@ int recorder::init(const AMRECORDER_SETTING & setting, const AMRECORDER_CALLBACK
 
 				error = _recorder_desktop->init(
 					{
-						setting.v_left,setting.v_top,setting.v_width + setting.v_left,setting.v_height + setting.v_top
+						setting.v_handle,setting.v_left,setting.v_top,setting.v_width + setting.v_left,setting.v_height + setting.v_top
 					},
 					setting.v_frame_rate,
 					setting.v_mouse_track
@@ -201,7 +201,7 @@ int recorder::init(const AMRECORDER_SETTING & setting, const AMRECORDER_CALLBACK
 
 		error = _recorder_desktop->init(
 		{
-			setting.v_left,setting.v_top,setting.v_width + setting.v_left,setting.v_height + setting.v_top
+			setting.v_handle,setting.v_left,setting.v_top,setting.v_width + setting.v_left,setting.v_height + setting.v_top
 		},
 			setting.v_frame_rate,
 			setting.v_mouse_track

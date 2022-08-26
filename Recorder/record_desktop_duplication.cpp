@@ -55,6 +55,7 @@ namespace am {
 		_fps = fps;
 		_hasCursor = hasCursor;
 		_rect = rect;
+		_wnd = rect.wnd;
 
 		do {
 			_d3d11 = load_system_library("d3d11.dll");
@@ -677,6 +678,8 @@ namespace am {
 		// In case that,the value of position is negative value
 		left = abs(_cursor_info.position.x - _rect.left);
 		top = abs(_cursor_info.position.y - _rect.top);
+		if (left > _width || top > _height)//verify cursor valid region
+			return;
 
 		// Notice here
 		if (_cursor_info.shape.Type == DXGI_OUTDUPL_POINTER_SHAPE_TYPE_MONOCHROME)
@@ -826,13 +829,20 @@ namespace am {
 		while (_running)
 		{
 			//Timeout is no new picture,no need to update
-			HWND wnd = FindWindow(NULL, _regionTitle.c_str());
+			HWND wnd = (HWND)_wnd;//FindWindow(NULL, _regionTitle.c_str());
+			if (!IsWindow(wnd)) {
+				al_error("not valid window handle");
+				error = AE_WINDOW_INVALID;
+				continue;
+			}
+
 			RECT rt;
 			GetWindowRect(wnd, &rt);
 			_rect.left = rt.left;
 			_rect.top = rt.top;
 			_rect.right = rt.right;
 			_rect.bottom = rt.bottom;
+			//al_info("bixin client wnd: %p,left: %d,top:%d,right: %d,bottom: %d", wnd, _rect.left, _rect.top, _rect.right, _rect.bottom);
 			if ((error = get_desktop_image(&frame_info)) == AE_TIMEOUT) continue;
 
 			if (error != AE_NO) {
