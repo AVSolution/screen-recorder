@@ -7,7 +7,7 @@
 
 #define AMLOCK(A) std::lock_guard<std::mutex> lock(A)
 
-#define LOG_ROLL_SIZE (1024 * 1024)
+#define LOG_ROLL_SIZE (1024 * 1024 * 25)
 
 AMLog* AMLog::_log = NULL;
 std::mutex _lock;
