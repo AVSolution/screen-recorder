@@ -87,7 +87,7 @@ int start_muxer() {
 #endif // !USE_WASAPI
 
 
-	record_desktop_new(RECORD_DESKTOP_TYPES::DT_DESKTOP_WIN_DUPLICATION, &_recorder_desktop);
+	record_desktop_new(RECORD_DESKTOP_TYPES::DT_DESKTOP_WIN_GDI, &_recorder_desktop);
 
 	RECORD_DESKTOP_RECT rect;
 	rect.left = 0;
@@ -101,6 +101,7 @@ int start_muxer() {
 	rect.top = rt.top;
 	rect.right = rt.right;
 	rect.bottom = rt.bottom;
+	rect.wnd = wnd;
 
 	_recorder_desktop->init(rect, V_FRAME_RATE,true);
 
@@ -125,7 +126,7 @@ int start_muxer() {
 	setting.a_sample_rate = A_SAMPLE_RATE;
 	setting.a_bit_rate = A_BIT_RATE;
 
-	int error = _muxer->init(am::utils_string::ascii_utf8("..\\..\\save.flv").c_str(), _recorder_desktop, audios, 2, setting);
+	int error = _muxer->init(am::utils_string::ascii_utf8("save.flv").c_str(), _recorder_desktop, audios, 2, setting);
 	if (error != AE_NO) {
 		return error;
 	}
@@ -495,6 +496,13 @@ int main(int argc, char **argv)
 
 	al_info("record start...");
 
+	char temp_path[MAX_PATH];
+	GetTempPathA(MAX_PATH, temp_path);
+	std::string log_path(temp_path);
+
+	log_path += "amrecorder.log";
+	AMLog *log = AMLog::get(log_path.c_str());
+	al_info("=============record start==============");
 
 	am::winversion_info ver = { 0 };
 

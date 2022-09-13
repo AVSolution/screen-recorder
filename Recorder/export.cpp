@@ -154,23 +154,25 @@ int recorder::init(const AMRECORDER_SETTING & setting, const AMRECORDER_CALLBACK
 		AMERROR_CHECK(error);
 
 		error = _recorder_speaker->init(setting.a_speaker.name, setting.a_speaker.id, false);
-		AMERROR_CHECK(error);
+		//AMERROR_CHECK(error);
 
-		audios[audio_num] = _recorder_speaker;
-		audio_num++;
+		if (error == AE_NO) {
+			audios[audio_num] = _recorder_speaker;
+			audio_num++;
+		}
 	}
-
-
 
 	if (utils_string::utf8_ascii(setting.a_mic.name).length() && utils_string::utf8_ascii(setting.a_mic.id).length()) {
 		error = record_audio_new(RECORD_AUDIO_TYPES::AT_AUDIO_WAS, &_recorder_mic);
 		AMERROR_CHECK(error);
 
 		error = _recorder_mic->init(setting.a_mic.name, setting.a_mic.id, true);
-		AMERROR_CHECK(error);
+		//AMERROR_CHECK(error);
 
-		audios[audio_num] = _recorder_mic;
-		audio_num++;
+		if (error == AE_NO) {
+			audios[audio_num] = _recorder_mic;
+			audio_num++;
+		}
 	}
 #endif 
 
@@ -469,5 +471,5 @@ AMRECORDER_API void recorder_set_preview_enabled(int enable)
 AMRECORDER_API void recorder_set_logpath(const char * path)
 {
 	AMLog *log = AMLog::get(path);
-	al_info("=============record start==============");
+	al_info("=============record start==============\n logPath: %s",path);
 }

@@ -50,6 +50,7 @@ AMLog* AMLog::get(const char* path)
 	}
 	FILE* handle = _fsopen(path, "a+", _SH_DENYNO);
 	if (!handle) {
+		std::printf("LogFile handle is nullptr path: %s,error: %d\n",path,GetLastError());
 		return NULL;
 	}
 	_log = new AMLog(handle);

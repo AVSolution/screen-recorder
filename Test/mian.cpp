@@ -79,7 +79,7 @@ int main()
 	//////////////should be the truely encoder id,zero will always be soft x264
 	setting.v_enc_id = 0;
 
-	sprintf(setting.output, "..\\..\\save.flv");
+	sprintf(setting.output, "save.flv");
 	//sprintf(setting.output, "..\\..\\save.mkv");
 
 #if 1 //record speaker
