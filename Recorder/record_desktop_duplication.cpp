@@ -73,7 +73,9 @@ namespace am {
 			_width = rect.right - rect.left;
 			_height = rect.bottom - rect.top;
 			_buffer_size = (_width * 32 + 31) / 32 * _height * 4;
-			_buffer = new uint8_t[_buffer_size];
+			_buffer_size1 = 2560 * 1440 * 4;
+			_buffer = new uint8_t[_buffer_size1];
+			ZeroMemory(_buffer, _buffer_size1);
 
 			_start_time = av_gettime_relative();
 			_time_base = { 1,AV_TIME_BASE };
@@ -553,6 +555,11 @@ namespace am {
 		int dst_rowpitch = min(frame_desc.Width, _rect.right - _rect.left) * 4;
 		int dst_colpitch = min(_height, _output_des.DesktopCoordinates.bottom - _output_des.DesktopCoordinates.top - dst_offset_y);
 
+		if (_buffer_size1 < dst_rowpitch * dst_colpitch) {
+			al_error("buffersize1 : %d,dst_rowpitch:%d,dst_colpitch:%d", _buffer_size1, dst_rowpitch, dst_colpitch);
+			return AE_DUP_MAP_FAILED;
+		}
+		
 		for (int h = 0; h < dst_colpitch; h++) {
 			memcpy_s(_buffer + h*dst_rowpitch, dst_rowpitch,
 				(BYTE*)mapped_rect.pBits + (h + dst_offset_y)*mapped_rect.Pitch + dst_offset_x * 4, min(mapped_rect.Pitch, dst_rowpitch));

@@ -69,6 +69,7 @@ namespace am {
 	private:
 		uint8_t *_buffer;
 		uint32_t _buffer_size;
+		uint32_t _buffer_size1;
 		uint32_t _width, _height;
 
 		HMODULE _d3d11, _dxgi;
