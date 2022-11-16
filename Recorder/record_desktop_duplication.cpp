@@ -837,11 +837,30 @@ namespace am {
 		{
 			//Timeout is no new picture,no need to update
 			HWND wnd = (HWND)_wnd;//FindWindow(NULL, _regionTitle.c_str());
-			if (!IsWindow(wnd)) {
+			if (!IsWindow(wnd) || !IsWindowVisible(wnd)) {
 				al_error("not valid window handle");
 				error = AE_WINDOW_INVALID;
 				continue;
 			}
+
+			LONG lStyles = ::GetWindowLong(wnd,GWL_STYLE);
+			if (lStyles & WS_MINIMIZE) {
+				//al_info("window minimized");
+				Sleep(300);
+				ZeroMemory(_buffer, _buffer_size1);
+				av_image_fill_arrays(frame->data,
+					frame->linesize,
+					_buffer,
+					AV_PIX_FMT_BGRA,
+					_width,
+					_height,
+					1
+				);
+				if (_on_data) _on_data(frame);
+				continue;
+			}
+			else
+				; //al_info("not minimized");
 
 			RECT rt;
 			GetWindowRect(wnd, &rt);
@@ -849,7 +868,7 @@ namespace am {
 			_rect.top = rt.top;
 			_rect.right = rt.right;
 			_rect.bottom = rt.bottom;
-			//al_info("bixin client wnd: %p,left: %d,top:%d,right: %d,bottom: %d", wnd, _rect.left, _rect.top, _rect.right, _rect.bottom);
+			//al_info("bixin client wnd: %p,left: %d,top:%d,right: %d,bottom: %d,%d", wnd, _rect.left, _rect.top, _rect.right, _rect.bottom,IsWindowVisible(wnd));
 			if ((error = get_desktop_image(&frame_info)) == AE_TIMEOUT) continue;
 
 			if (error != AE_NO) {
