@@ -208,6 +208,7 @@ namespace am {
 		uint8_t *yuv_data = NULL;
 		
 		ret = _v_stream->v_sws->convert(frame, &yuv_data, &len);
+		
 		if (ret == AE_NO && yuv_data && len) {
 			_v_stream->v_enc->put(yuv_data, len, frame);
 
