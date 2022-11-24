@@ -31,6 +31,13 @@ namespace am {
 		int _buffer_size;
 
 		struct SwsContext *_ctx;
+
+		AVPixelFormat _src_fmt{ AV_PIX_FMT_NONE };
+		std::atomic_int _src_width{ 0 };
+		std::atomic_int _src_height{ 0 };
+		AVPixelFormat _dst_fmt{ AV_PIX_FMT_NONE };
+		std::atomic_int _dst_width{ 0 };
+		std::atomic_int _dst_height{ 0 };
 	};
 
 }

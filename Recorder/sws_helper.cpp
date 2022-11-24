@@ -27,6 +27,13 @@ namespace am {
 		if (_inited)
 			return AE_NO;
 
+		_src_fmt = src_fmt;
+		_src_width = src_width;
+		_src_height = src_height;
+		_dst_fmt = dst_fmt;
+		_dst_width = dst_width;
+		_dst_height = dst_height;
+
 		_ctx = sws_getContext(
 			src_width,
 			src_height,
@@ -56,6 +63,12 @@ namespace am {
 
 	int sws_helper::convert(const AVFrame *frame, uint8_t ** out_data, int * len)
 	{
+		if ((_src_width != 0 && _src_width != frame->width) ||
+			(_src_height != 0 && _src_height != frame->height)) {
+			cleanup();
+			init(_src_fmt, frame->width, frame->height, _dst_fmt, _dst_width, _dst_height);
+		}
+
 		int error = AE_NO;
 		if (!_inited || !_ctx || !_buffer)
 			return AE_NEED_INIT;

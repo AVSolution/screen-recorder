@@ -57,7 +57,7 @@ public:
 
 private:
 	void on_preview_yuv(const uint8_t *data, int size, int width, int height, int type);
-	void get_valid_out_resolution(int src_width, int src_height, int *out_width, int *out_height);
+	void get_valid_out_resolution(int src_width, int src_height, int *out_width, int *out_height,double *dscale);
 private:
 	AMRECORDER_SETTING _setting;
 	AMRECORDER_CALLBACK _callbacks;
@@ -221,7 +221,7 @@ int recorder::init(const AMRECORDER_SETTING & setting, const AMRECORDER_CALLBACK
 	mux_setting.v_qb = setting.v_qb;
 	mux_setting.v_encoder_id = (am::ENCODER_VIDEO_ID)setting.v_enc_id;
 
-	get_valid_out_resolution(setting.v_width, setting.v_height, &mux_setting.v_out_width, &mux_setting.v_out_height);
+	get_valid_out_resolution(setting.v_width, setting.v_height, &mux_setting.v_out_width, &mux_setting.v_out_height,&mux_setting.dscale);
 
 	mux_setting.a_nb_channel = 2;
 	mux_setting.a_sample_fmt = AV_SAMPLE_FMT_FLTP;
@@ -302,15 +302,17 @@ void recorder::on_preview_yuv(const uint8_t * data, int size, int width, int hei
 	if (_callbacks.func_preview_yuv != NULL)
 		_callbacks.func_preview_yuv(data, size, width, height, type);
 }
-void recorder::get_valid_out_resolution(int src_width, int src_height, int * out_width, int * out_height)
+void recorder::get_valid_out_resolution(int src_width, int src_height, int * out_width, int * out_height, double *dscale)
 {
 	int scale_cx = src_width;
 	int scale_cy = src_height;
 
 	int i = 0;
+	*dscale = 1.0;
 
 	while (((scale_cx * scale_cy) > (1920 * 1080)) && scaled_vals[i] > 0.0) {
 		double scale = scaled_vals[i++];
+		*dscale = scale;
 		scale_cx = uint32_t(double(src_width) / scale);
 		scale_cy = uint32_t(double(src_height) / scale);
 	}

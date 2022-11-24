@@ -33,6 +33,7 @@ namespace am {
 		int a_sample_rate;
 		AVSampleFormat a_sample_fmt;
 		int a_bit_rate;
+		double dscale = 1.0;
 	}MUX_SETTING;
 
 	typedef struct MUX_STREAM_T {

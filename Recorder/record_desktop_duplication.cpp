@@ -509,6 +509,8 @@ namespace am {
 			if (_rect.right > frame_desc.Width) {
 				_rect.left -= (_rect.right - frame_desc.Width);
 				_rect.right = frame_desc.Width;
+				if (_rect.left < 0)
+					_rect.left = 0;
 			}
 			if (_rect.top < 0) {
 				_rect.bottom -= _rect.top;
@@ -517,7 +519,11 @@ namespace am {
 			if (_rect.bottom > frame_desc.Height) {
 				_rect.top -= (_rect.bottom - frame_desc.Height);
 				_rect.bottom = frame_desc.Height;
+				if (_rect.top < 0)
+					_rect.top = 0;
 			}
+			_width = _rect.right - _rect.left;
+			_height = _rect.bottom - _rect.top;
 		}
 
 		// Create a new staging buffer for fill frame image
