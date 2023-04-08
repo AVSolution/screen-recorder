@@ -49,6 +49,9 @@ namespace am {
 		int error = AE_NO;
 		int ret = 0;
 
+		muxer_file::is_split = setting.is_split;
+		muxer_split::_split_duration = setting.split_duration;
+
 		do {
 			al_info("start to initialize muxer ,output:%s ", output_file);
 
@@ -72,7 +75,7 @@ namespace am {
 			if (error != AE_NO)
 				break;
 
-			av_dump_format(_fmt_ctx, 0, NULL, 1);
+			av_dump_format(_fmt_ctx, 0, output_file, 1);
 
 			_inited = true;
 
@@ -98,6 +101,11 @@ namespace am {
 
 		if (_inited == false) {
 			return AE_NEED_INIT;
+		}
+
+		if (muxer_file::is_split) {
+			muxer_split::start_split_record(_fmt_ctx);
+			//error = muxer_split::init_split_cxt(_fmt_ctx);
 		}
 
 		_base_time = av_gettime_relative();
@@ -138,11 +146,10 @@ namespace am {
 
 		if (_running == false)
 			return AE_NO;
-
 		_running = false;
 
 		al_debug("try to stop muxer....");
-
+	
 		al_debug("stop audio recorder...");
 		if (_a_stream && _a_stream->a_src) {
 			for (int i = 0; i < _a_stream->a_nb; i++) {
@@ -165,7 +172,6 @@ namespace am {
 			}
 		}
 
-
 		al_debug("stop video encoder...");
 		if (_v_stream && _v_stream->v_enc)
 			_v_stream->v_enc->stop();
@@ -177,6 +183,10 @@ namespace am {
 		}
 
 		al_debug("write file trailer...");
+
+		if (muxer_file::is_split)
+			muxer_split::stop_split_record();
+
 		if (_fmt_ctx)
 			av_write_trailer(_fmt_ctx);//must write trailer ,otherwise file can not play
 
@@ -545,6 +555,29 @@ namespace am {
 
 			_v_stream->setting = setting;
 			//_v_stream->filter = av_bitstream_filter_init("h264_mp4toannexb");
+
+			if(0){
+				//muxer split
+				if (1) {
+					AVStream* _videoOutputStream_split = avformat_new_stream(_fmt_ctx_split, st->codec->codec);
+					AVCodecParameters *par = avcodec_parameters_alloc();
+					ret = avcodec_parameters_from_context(par, st->codec);
+					if (ret == 0)
+						ret = avcodec_parameters_to_context(_videoOutputStream_split->codec, par);
+					avcodec_parameters_free(&par);
+
+					_videoOutputStream_split->time_base = st->time_base;
+					av_dict_copy(&_videoOutputStream_split->metadata, st->metadata, 0);
+					_videoOutputStream_split->codec->codec_tag = 0;
+					if (_fmt_ctx_split->oformat->flags & AVFMT_GLOBALHEADER)
+						_videoOutputStream_split->codec->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
+				}
+				else {
+					AVStream* _videoOutputStream_split = avformat_new_stream(_fmt_ctx_split, st->codec->codec);
+					_videoOutputStream_split->time_base = st->time_base;
+					avcodec_parameters_copy(_videoOutputStream_split->codecpar, st->codecpar);
+				}
+			}
 		} while (0);
 
 		return error;
@@ -699,6 +732,35 @@ namespace am {
 			_a_stream->setting = setting;
 			_a_stream->filter = av_bitstream_filter_init("aac_adtstoasc");
 
+			if(0){
+				//muxer split
+				if (0) {
+					AVStream* _audioOutputStream_split = avformat_new_stream(_fmt_ctx_split, st->codec->codec);
+					AVCodecParameters *par = avcodec_parameters_alloc();
+					ret = avcodec_parameters_from_context(par, st->codec);
+					if (ret == 0)
+						ret = avcodec_parameters_to_context(_audioOutputStream_split->codec, par);
+					avcodec_parameters_free(&par);
+
+					_audioOutputStream_split->time_base = st->time_base;
+					av_dict_copy(&_audioOutputStream_split->metadata, st->metadata, 0);
+					_audioOutputStream_split->codec->codec_tag = 0;
+					if (_fmt_ctx_split->oformat->flags & AVFMT_GLOBALHEADER)
+						_audioOutputStream_split->codec->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
+				}
+				else {
+					AVStream *videoInputStream = nullptr;
+					for (int i = 0; i < _fmt_ctx->nb_streams; i++)
+					{
+						if (_fmt_ctx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO)
+							videoInputStream = _fmt_ctx->streams[i];
+						else continue;
+					}
+					AVStream* _audioOutputStream_split = avformat_new_stream(_fmt_ctx_split, codec);
+					_audioOutputStream_split->time_base = st->time_base;
+					avcodec_parameters_copy(_audioOutputStream_split->codecpar, videoInputStream->codecpar);
+				}
+			}
 		} while (0);
 
 		return error;
@@ -844,14 +906,15 @@ namespace am {
 
 		av_packet_rescale_ts(packet, { 1,AV_TIME_BASE }, _v_stream->st->time_base);
 
-
-		al_debug("V:%lld", packet->pts);
+		//al_debug("V:%lld", packet->pts);
 		
 		av_assert0(packet->data != NULL);
 
-		int ret = av_interleaved_write_frame(_fmt_ctx, packet);//no need to unref packet,this will be auto unref
+		int ret = av_write_frame(_fmt_ctx, packet);//if interleaved, no need to unref packet,this will be auto unref
+		if(muxer_file::is_split)
+			ret = muxer_split::write_packet(packet);
 
-		if (ret != 0) {
+		if (ret != 0) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
 			al_fatal("write video frame error:%d", ret);
 		}
 
@@ -892,12 +955,14 @@ namespace am {
 
 		av_packet_rescale_ts(packet, { 1,AV_TIME_BASE }, _a_stream->st->time_base);
 		
-
-		al_debug("A:%lld %lld", packet->pts, packet->dts);
+		//al_debug("A:%lld %lld", packet->pts, packet->dts);
 
 		av_assert0(packet->data != NULL);
 
-		int ret = av_interleaved_write_frame(_fmt_ctx, packet);//no need to unref packet,this will be auto unref
+		int ret = av_write_frame(_fmt_ctx, packet);//if interleaved, no need to unref packet,this will be auto unref
+		if(muxer_file::is_split)
+			ret = muxer_split::write_packet(packet);
+
 		if (ret != 0) {
 			al_fatal("write audio frame error:%d", ret);
 		}

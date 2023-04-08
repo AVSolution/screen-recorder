@@ -27,6 +27,25 @@ void on_preview_image(
 	}
 }
 
+void on_split_progress(
+	const char* path,
+	int index, 
+	int over, 
+	int error
+) {
+	printf("on_split_progress path: %s,index: %d,over:%d,error:%d \n",path,index,over,error);
+}
+
+void remux_process(const char *path, int progress, int total)
+{
+	printf("remux_process: %s, %d,%d\n",path,progress,total);
+}
+
+void remux_state(const char *path, int state, int error)
+{
+	printf("remux_state: %s,%d,%d\n",path,state,error);
+}
+
 int main()
 {
 	AMRECORDER_DEVICE *speakers = NULL, *mics = NULL;
@@ -73,11 +92,15 @@ int main()
 	setting.v_qb = 100;
 	setting.v_bit_rate = 1280 * 1000;
 	setting.v_frame_rate = 15;
-	setting.v_cutting_screen = true;
+	setting.v_cutting_screen = false;
 	setting.v_mouse_track = true;
 
 	//////////////should be the truely encoder id,zero will always be soft x264
 	setting.v_enc_id = 0;
+
+	//split record.
+	setting.is_split = true;
+	setting.split_duration = 4;
 
 	sprintf(setting.output, "save.flv");
 	//sprintf(setting.output, "..\\..\\save.mkv");
@@ -97,19 +120,27 @@ int main()
 #endif
 
 	callback.func_preview_yuv = on_preview_image;
+	callback.func_split_progress = on_split_progress;
 
 	printf("please input record seconds:\n");
 	int nums = 0;
 	scanf("%d", &nums);
 	printf("record time : %d\n", nums);
 
+#if 1
 	int err = recorder_init(setting, callback);
 
-	//recorder_set_preview_enabled(true);
+	recorder_set_preview_enabled(false);
 
 	err = recorder_start();
+#endif
 
-
+#if 0
+	std::thread([=]() {
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+		recorder_remux(setting.output, "save-back.flv", remux_process, remux_state);
+	}).detach();
+#endif
 
 	//CAN NOT PAUSE FOR NOW
 	/*getchar();
@@ -126,7 +157,10 @@ int main()
 
 	for (int i = 0; i < nums; i++) {
 		std::this_thread::sleep_for(std::chrono::seconds(2));
-		printf("record time : sleep 2s  count: %d", i);
+		printf("record time : sleep 2s  count: %d\n", i);
+		if (nums == 2) {
+			recorder_remux_destory();
+		}
 	}
 
 	recorder_stop();

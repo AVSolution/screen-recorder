@@ -58,6 +58,7 @@ public:
 private:
 	void on_preview_yuv(const uint8_t *data, int size, int width, int height, int type);
 	void get_valid_out_resolution(int src_width, int src_height, int *out_width, int *out_height,double *dscale);
+	void on_split_progress(const char* path, int index, int over, int error);
 private:
 	AMRECORDER_SETTING _setting;
 	AMRECORDER_CALLBACK _callbacks;
@@ -221,6 +222,10 @@ int recorder::init(const AMRECORDER_SETTING & setting, const AMRECORDER_CALLBACK
 	mux_setting.v_qb = setting.v_qb;
 	mux_setting.v_encoder_id = (am::ENCODER_VIDEO_ID)setting.v_enc_id;
 
+	//split record.
+	mux_setting.is_split = setting.is_split;
+	mux_setting.split_duration = setting.split_duration;
+
 	get_valid_out_resolution(setting.v_width, setting.v_height, &mux_setting.v_out_width, &mux_setting.v_out_height,&mux_setting.dscale);
 
 	mux_setting.a_nb_channel = 2;
@@ -228,11 +233,9 @@ int recorder::init(const AMRECORDER_SETTING & setting, const AMRECORDER_CALLBACK
 	mux_setting.a_sample_rate = 44100;
 	mux_setting.a_bit_rate = 128000;
 
-
-
 	_muxer = new muxer_ffmpeg();
 
-	_muxer->registe_yuv_data(std::bind(
+	_muxer->register_yuv_data(std::bind(
 		&recorder::on_preview_yuv,
 		this,
 		std::placeholders::_1,
@@ -240,6 +243,15 @@ int recorder::init(const AMRECORDER_SETTING & setting, const AMRECORDER_CALLBACK
 		std::placeholders::_3,
 		std::placeholders::_4,
 		std::placeholders::_5
+	));
+
+	_muxer->register_split_progress(std::bind(
+		&recorder::on_split_progress,
+		this,
+		std::placeholders::_1,
+		std::placeholders::_2,
+		std::placeholders::_3,
+		std::placeholders::_4
 	));
 
 	error = _muxer->init(setting.output, _recorder_desktop, audios, audio_num, mux_setting);
@@ -329,6 +341,11 @@ void recorder::get_valid_out_resolution(int src_width, int src_height, int * out
 	*out_height = scale_cy;
 
 	al_info("get valid output resolution from %dx%d to %dx%d,with scale:%lf", src_width, src_height, scale_cx, scale_cy, scaled_vals[i]);
+}
+void recorder::on_split_progress(const char* path, int index, int over, int error)
+{
+	if (nullptr != _callbacks.func_split_progress)
+		_callbacks.func_split_progress(path, index, over, error);
 }
 }
 
@@ -463,6 +480,11 @@ AMRECORDER_API int recorder_remux(const char * src, const char * dst, AMRECORDER
 	param.cb_state = func_state;
 
 	return am::remuxer_ffmpeg::instance()->create_remux(param);
+}
+
+AMRECORDER_API void recorder_remux_destory()
+{
+	am::remuxer_ffmpeg::instance()->destroy_remux();
 }
 
 AMRECORDER_API void recorder_set_preview_enabled(int enable)

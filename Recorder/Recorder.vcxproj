@@ -522,6 +522,7 @@ echo f| xcopy /r /y $(TargetDir)$(TargetName).lib $(SolutionDir)2node\platform\w
     <ClInclude Include="log_helper.h" />
     <ClInclude Include="headers_mmdevice.h" />
     <ClInclude Include="mul_db.h" />
+    <ClInclude Include="muxer_split.h" />
     <ClInclude Include="muxer_define.h" />
     <ClInclude Include="muxer_file.h" />
     <ClInclude Include="muxer_ffmpeg.h" />
@@ -565,6 +566,7 @@ echo f| xcopy /r /y $(TargetDir)$(TargetName).lib $(SolutionDir)2node\platform\w
     <ClCompile Include="log_helper.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="headers_mmdevice.cpp" />
+    <ClCompile Include="muxer_split.cpp" />
     <ClCompile Include="muxer_file.cpp" />
     <ClCompile Include="muxer_ffmpeg.cpp" />
     <ClCompile Include="record_audio.cpp" />

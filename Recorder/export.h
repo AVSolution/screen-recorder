@@ -97,9 +97,20 @@ typedef struct {
 
 	/**
 	* Output file path,the output file format is depended on the ext name.
-	* Support .mp4|.mkv | flv for now.
+	* Support .mp4|.mkv | .flv for now.
 	*/
 	char output[260];
+
+	/**
+	*Whether active split record.
+	* default 0
+	*/
+	bool is_split = 0;
+	/**
+	* Fragmentation duration(s)
+	* default : 10min = 10 * 60(s)
+	*/
+	int split_duration = 10 * 60;
 
 	/**
 	* Desktop device
@@ -191,9 +202,18 @@ typedef void(*AMRECORDER_FUNC_REMUX_PROGRESS)(const char *path, int progress, in
 * Remux state callback function
 * @param[in] path    source file path
 * @param[in] state   0 for unremuxing,1 for remuxing
-* @param[in] error   0 for succed,otherwhise error code
+* @param[in] error   0 for succeed,otherwise error code
 */
 typedef void(*AMRECORDER_FUNC_REMUX_STATE)(const char *path, int state, int error);
+
+/**
+* Muxer split state callback function
+* @param[out] path		split file path
+* @param[out] index   correspond the split index [1-x]
+* @param[out] over    1 for finished,otherwise continue.
+* @param[out] error    0 for succeed,otherwise error code.
+*/
+typedef void (*AMRECORDER_FUNC_SPLIT_MUXER_PROGRESS)(const char* path,int index,int over,int error);
 
 /**
 * Callback functions structure
@@ -205,6 +225,7 @@ typedef struct {
 	AMRECORDER_FUNC_DEVICE_CHANGE func_device_change;
 	AMRECORDER_FUNC_PREVIEW_YUV func_preview_yuv;
 	AMRECORDER_FUNC_PREVIEW_AUDIO func_preview_audio;
+	AMRECORDER_FUNC_SPLIT_MUXER_PROGRESS func_split_progress;
 }AMRECORDER_CALLBACK;
 #pragma pack(pop)
 
@@ -293,6 +314,11 @@ AMRECORDER_API int recorder_remux(
 	const char *src, const char *dst,
 	AMRECORDER_FUNC_REMUX_PROGRESS func_progress,
 	AMRECORDER_FUNC_REMUX_STATE func_state);
+
+/**
+*Recorder destory a remux job
+*/
+AMRECORDER_API void recorder_remux_destory();
 
 /**
 * Enable or disable preview include video and audio

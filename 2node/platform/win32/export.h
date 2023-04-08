@@ -295,6 +295,11 @@ AMRECORDER_API int recorder_remux(
 	AMRECORDER_FUNC_REMUX_STATE func_state);
 
 /**
+*Recorder Destory remux job
+*/
+AMRECORDER_API void recorder_remux_destory();
+
+/**
 * Enable or disable preview include video and audio
 * @param[in] enable 1 for enable,0 for disable
 */

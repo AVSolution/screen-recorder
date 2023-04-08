@@ -8,12 +8,15 @@
 #include <mutex>
 
 #include "muxer_file.h"
+#include "muxer_split.h"
 
 #include "headers_ffmpeg.h"
 
 namespace am {
 
-	class muxer_ffmpeg : public muxer_file
+	class muxer_ffmpeg : 
+		public muxer_split,
+		public muxer_file
 	{
 	public:
 		muxer_ffmpeg();
