@@ -53,6 +53,7 @@ namespace am {
 			_encoder_ctx->codec_id = AV_CODEC_ID_H264;
 			_encoder_ctx->codec_type = AVMEDIA_TYPE_VIDEO;
 			_encoder_ctx->pix_fmt = AV_PIX_FMT_YUV420P;
+			_encoder_ctx->profile = FF_PROFILE_H264_MAIN;
 			_encoder_ctx->width = pic_width;
 			_encoder_ctx->height = pic_height;
 			_encoder_ctx->time_base.num = 1;
