@@ -73,7 +73,7 @@ int main()
 
 	SetProcessDpiAwareness(PROCESS_SYSTEM_DPI_AWARE);
 
-	HWND wnd = ::FindWindow(NULL, L"±»–ƒ");
+	HWND wnd = ::FindWindow(NULL, L"”„∂˙”Ô“Ù");
 	if (wnd == nullptr) {
 		printf(" not find bixin client window.\n");
 		return -1;
@@ -99,7 +99,7 @@ int main()
 	setting.v_enc_id = 0;
 
 	//split record.
-	setting.is_split = true;
+	setting.is_split = false;
 	setting.split_duration = 4;
 
 	sprintf(setting.output, "save.flv");

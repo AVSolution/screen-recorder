@@ -339,6 +339,8 @@ void recorder::get_valid_out_resolution(int src_width, int src_height, int * out
 
 	*out_width = scale_cx;
 	*out_height = scale_cy;
+	//*out_width = 1280;
+	//*out_height = 720;
 
 	al_info("get valid output resolution from %dx%d to %dx%d,with scale:%lf", src_width, src_height, scale_cx, scale_cy, scaled_vals[i]);
 }

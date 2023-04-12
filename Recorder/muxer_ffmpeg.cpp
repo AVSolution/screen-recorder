@@ -910,7 +910,7 @@ namespace am {
 		
 		av_assert0(packet->data != NULL);
 
-		int ret = av_write_frame(_fmt_ctx, packet);//if interleaved, no need to unref packet,this will be auto unref
+		int ret = av_interleaved_write_frame(_fmt_ctx, packet);//if interleaved, no need to unref packet,this will be auto unref
 		if(muxer_file::is_split)
 			ret = muxer_split::write_packet(packet);
 
@@ -959,7 +959,7 @@ namespace am {
 
 		av_assert0(packet->data != NULL);
 
-		int ret = av_write_frame(_fmt_ctx, packet);//if interleaved, no need to unref packet,this will be auto unref
+		int ret = av_interleaved_write_frame(_fmt_ctx, packet);//if interleaved, no need to unref packet,this will be auto unref
 		if(muxer_file::is_split)
 			ret = muxer_split::write_packet(packet);
 
